@@ -1,0 +1,65 @@
+using System;
+class Qqq
+{
+    public int GO()
+    {
+        try
+        {
+            return InnnerGO();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    public int GO4()
+    {
+        try
+        {
+            return InnnerGO();
+        }
+        catch (Exception ex2)
+        {
+            throw ex2;
+        }
+    }
+    public int GO5()
+    {
+        try
+        {
+            return InnnerGO();
+        }
+        catch (Exception ex)
+        {
+            var ex2 = new InvalidOperationException(ex.Message);
+            throw ex;
+        }
+    }
+    public int GO2()
+    {
+        try
+        {
+            return InnnerGO();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(ex.Message);
+        }
+    }
+    public int GO3()
+    {
+        try
+        {
+            return InnnerGO();
+        }
+        catch (Exception ex)
+        {
+            var ex2 = new InvalidOperationException(ex.Message);
+            throw ex2;
+        }
+    }
+    int InnnerGO()
+    {
+        throw new Exception("surprise mother fucker");
+    }
+}
