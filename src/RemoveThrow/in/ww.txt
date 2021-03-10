@@ -1,0 +1,19 @@
+using System;
+class Www
+{
+    public int GO()
+    {
+        try
+        {
+            return InnnerGO();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    int InnnerGO()
+    {
+        throw new Exception("surprise mother fucker");
+    }
+}
