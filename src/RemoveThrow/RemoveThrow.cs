@@ -4,11 +4,13 @@ using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
+// ReSharper disable InconsistentNaming
 
 namespace ConApp
 {
-    static class RemoveThrow
+    internal static class RemoveThrow
     {
+        private static readonly char q = Path.DirectorySeparatorChar;
         internal static void GO()
         {
             var compilation = GetCompilation();
@@ -17,8 +19,8 @@ namespace ConApp
             foreach (var tree in compilation.SyntaxTrees)
             {
                 ++total;
-                var problems = tree.GetDiagnostics();
-                if (problems.Any())
+                var problems = tree.GetDiagnostics().ToArray();
+                if (problems.Length > 0)
                 {
                     foreach (var item in problems) Console.WriteLine(item);
                     continue;
@@ -29,7 +31,8 @@ namespace ConApp
                 var newNode = rewriter.Visit(oldNode);
                 if (newNode == oldNode) continue;
                 ++hasChanged;
-                var path = tree.FilePath.Replace("RemoveThrow/in/", "RemoveThrow/out/");
+                var path = tree.FilePath.Replace($"RemoveThrow{q}in{q}", $"RemoveThrow{q}out{q}");
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
                 File.WriteAllText(path, newNode.ToFullString());
                 var newTree = tree.WithRootAndOptions(newNode, opt);
                 compilation.ReplaceSyntaxTree(tree, newTree);
@@ -38,9 +41,9 @@ namespace ConApp
             {
                 using var ms = new MemoryStream();
                 var emitResult = compilation.Emit(ms);
-                if (!emitResult.Success)
-                    foreach (var problem in emitResult.Diagnostics)
-                        Console.WriteLine(problem);
+                if (emitResult.Success) return;
+                foreach (var problem in emitResult.Diagnostics)
+                    Console.WriteLine(problem);
             }
         }
         private static CSharpCompilation GetCompilation()
@@ -50,14 +53,14 @@ namespace ConApp
             var refs = new[]
             {
                 MetadataReference.CreateFromFile(file),
-                MetadataReference.CreateFromFile(typeof(System.Console).GetTypeInfo().Assembly.Location),
-                MetadataReference.CreateFromFile(Path.Combine(dir, "System.Runtime.dll")),
+                MetadataReference.CreateFromFile(typeof(Console).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(Path.Combine(dir!, "System.Runtime.dll")),
             };
             var compilation = CSharpCompilation.Create("Qwe",
-                syntaxTrees: Directory.EnumerateFiles("src/RemoveThrow/in").Select(q =>
+                syntaxTrees: Directory.EnumerateFiles($"src{q}RemoveThrow{q}in").Select(w =>
                 {
-                    var w = File.ReadAllText(q);
-                    return CSharpSyntaxTree.ParseText(w).WithFilePath(q);
+                    var e = File.ReadAllText(w);
+                    return CSharpSyntaxTree.ParseText(e).WithFilePath(w);
                 }),
                 references: refs,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
